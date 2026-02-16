@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Denominaciones MXN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1f1f1f;
+            color: #ffffff;
+            padding: 40px 30px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 0.95em;
+            color: #8a8a8a;
+            font-weight: 400;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .area-section {
+            background: #1f1f1f;
+            border-radius: 4px;
+            padding: 25px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .area-title {
+            font-size: 1.3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .area-total {
+            font-size: 0.85em;
+            background: #2a2a2a;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .subarea {
+            background: #1a1a1a;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 3px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .subarea label {
+            display: block;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subarea input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2a2a2a;
+            border-radius: 3px;
+            font-size: 1.1em;
+            transition: all 0.2s;
+            text-align: right;
+            font-weight: 600;
+            background: #0f0f0f;
+            color: #ffffff;
+        }
+
+        .subarea input:focus {
+            outline: none;
+            border-color: #4a4a4a;
+            background: #1a1a1a;
+        }
+
+        .totals-section {
+            grid-column: 1 / -1;
+            background: #1f1f1f;
+            color: white;
+            padding: 30px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #3a3a3a;
+        }
+
+        .totals-section h2 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #8a8a8a;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-amount {
+            font-size: 3em;
+            font-weight: 600;
+            margin: 10px 0;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+
+        .denominations-section {
+            grid-column: 1 / -1;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .denominations-title {
+            font-size: 1.3em;
+            color: #ffffff;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .denominations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .denomination-card {
+            background: #1f1f1f;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .denomination-card h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        .denomination-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #252525;
+            align-items: center;
+        }
+
+        .denomination-item:last-child {
+            border-bottom: none;
+        }
+
+        .denomination-label {
+            font-weight: 500;
+            color: #b0b0b0;
+            font-size: 1em;
+        }
+
+        .denomination-value {
+            color: #ffffff;
+            font-weight: 500;
+            text-align: right;
+            font-size: 0.95em;
+        }
+
+        .denomination-subtotal {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1em;
+            text-align: right;
+        }
+
+        .denomination-item.zero {
+            opacity: 0.3;
+        }
+
+        .btn-calculate {
+            grid-column: 1 / -1;
+            background: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #3a3a3a;
+            padding: 18px 40px;
+            font-size: 1.1em;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-calculate:hover {
+            background: #3a3a3a;
+            border-color: #4a4a4a;
+        }
+
+        .btn-calculate:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* HISTORIAL */
+        .historial-item {
+            background: #1f1f1f;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .historial-item:hover {
+            border-color: #3a3a3a;
+            background: #252525;
+        }
+
+        .historial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .historial-fecha {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .historial-total {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .historial-areas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .historial-area {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 3px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .historial-area-nombre {
+            font-size: 0.85em;
+            color: #8a8a8a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .historial-area-total {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .historial-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            background: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #3a3a3a;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background: #3a3a3a;
+        }
+
+        .btn-danger {
+            background: #3a1a1a;
+            border-color: #4a2a2a;
+        }
+
+        .btn-danger:hover {
+            background: #4a2a2a;
+        }
+
+        .historial-detalle {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .historial-detalle.show {
+            display: block;
+        }
+
+        .historial-subarea {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #252525;
+            color: #b0b0b0;
+        }
+
+        .historial-subarea:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Control de Denominaciones MXN</h1>
+            <p>Sistema de distribución de efectivo por áreas</p>
+        </div>
+
+        <div class="content">
+            <!-- ÁREA: PROYECTO -->
+            <div class="area-section">
+                <div class="area-title">
+                    📊 Proyecto
+                    <span class="area-total" id="total-proyecto">$0.00</span>
+                </div>
+
+                <div class="subarea">
+                    <label for="nomina-proyecto">Nómina Proyecto</label>
+                    <input type="text" id="nomina-proyecto" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="tiempo-extra-proyecto">Tiempo Extra</label>
+                    <input type="text" id="tiempo-extra-proyecto" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="bono-proyecto">Bono Proyecto</label>
+                    <input type="text" id="bono-proyecto" value="0" placeholder="Escribe la cantidad...">
+                </div>
+            </div>
+
+            <!-- ÁREA: NÓMINA -->
+            <div class="area-section">
+                <div class="area-title">
+                    👥 Nómina
+                    <span class="area-total" id="total-nomina">$0.00</span>
+                </div>
+
+                <div class="subarea">
+                    <label for="nomina">Nómina</label>
+                    <input type="text" id="nomina" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="tiempo-extra-nomina">Tiempo Extra</label>
+                    <input type="text" id="tiempo-extra-nomina" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="bono-nomina">Bono Nómina</label>
+                    <input type="text" id="bono-nomina" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="bono-recomendacion">Bono de Recomendación</label>
+                    <input type="text" id="bono-recomendacion" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="personal-temporal">Personal Temporal</label>
+                    <input type="text" id="personal-temporal" value="0" placeholder="Escribe la cantidad...">
+                </div>
+
+                <div class="subarea">
+                    <label for="dia-festivo">Día Festivo Laborado</label>
+                    <input type="text" id="dia-festivo" value="0" placeholder="Escribe la cantidad...">
+                </div>
+            </div>
+
+            <button class="btn-calculate" onclick="calcularTodo()">🧮 Calcular Denominaciones</button>
+
+            <!-- TOTALES GENERALES -->
+            <div class="totals-section">
+                <h2>💵 Total General</h2>
+                <div class="total-amount" id="total-general">$0.00</div>
+            </div>
+
+            <!-- DENOMINACIONES -->
+            <div class="denominations-section" id="denominations-container" style="display: none;">
+                <div class="denominations-title">📋 Denominaciones Requeridas por Área</div>
+                <div class="denominations-grid" id="denominations-grid"></div>
+
+                <!-- Botón para guardar en historial -->
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn-calculate" onclick="guardarEnHistorial()" style="background: #3a3a3a; border-color: #4a4a4a;">
+                        💾 Guardar en Historial
+                    </button>
+                </div>
+            </div>
+
+            <!-- HISTORIAL -->
+            <div class="denominations-section" style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <div class="denominations-title" style="margin: 0;">📅 Historial de Cálculos</div>
+                    <button class="btn" onclick="limpiarHistorial()" style="background: #3a3a3a; border-color: #4a4a4a; padding: 8px 16px; font-size: 0.9em;">
+                        🗑️ Limpiar Todo
+                    </button>
+                </div>
+                <div id="historial-container">
+                    <p style="text-align: center; color: #8a8a8a; padding: 40px;">No hay registros en el historial</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/calculator.js"></script>
+    <script>
+        // Actualizar totales en tiempo real
+        const proyectoInputs = ['nomina-proyecto', 'tiempo-extra-proyecto', 'bono-proyecto'];
+        const nominaInputs = ['nomina', 'tiempo-extra-nomina', 'bono-nomina', 'bono-recomendacion', 'personal-temporal', 'dia-festivo'];
+
+        // Función para extraer valor numérico del input
+        function getNumericValue(value) {
+            if (!value) return 0;
+            // Eliminar $, comas y espacios, mantener solo números y punto decimal
+            const cleaned = value.replace(/[$,\s]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
+
+        // Event listeners para todos los inputs
+        [...proyectoInputs, ...nominaInputs].forEach(id => {
+            const input = document.getElementById(id);
+
+            // Permitir solo números y punto mientras escribe
+            input.addEventListener('input', function() {
+                // Eliminar todo excepto números y punto
+                let value = this.value.replace(/[^\d.]/g, '');
+
+                // Permitir solo un punto decimal
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+
+                // Limitar decimales a 2
+                if (parts[1] && parts[1].length > 2) {
+                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
+
+                this.value = value;
+                actualizarTotales();
+            });
+
+            // Formatear al salir del campo o presionar Enter
+            input.addEventListener('blur', function() {
+                const numValue = getNumericValue(this.value);
+                if (numValue > 0) {
+                    this.value = formatCurrency(numValue);
+                } else {
+                    this.value = '0';
+                }
+                this.style.fontWeight = '700';
+                this.style.color = '#11998e';
+            });
+
+            // Al hacer clic, quitar formato para editar fácil
+            input.addEventListener('focus', function() {
+                const numValue = getNumericValue(this.value);
+                if (numValue === 0) {
+                    this.value = '';
+                } else {
+                    this.value = numValue.toString();
+                }
+                this.style.fontWeight = '600';
+                this.style.color = '#495057';
+                this.select();
+            });
+
+            // Formatear con Enter también
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.blur();
+                }
+            });
+        });
+
+        function actualizarTotales() {
+            // Calcular total Proyecto
+            let totalProyecto = 0;
+            proyectoInputs.forEach(id => {
+                totalProyecto += getNumericValue(document.getElementById(id).value);
+            });
+
+            // Calcular total Nómina
+            let totalNomina = 0;
+            nominaInputs.forEach(id => {
+                totalNomina += getNumericValue(document.getElementById(id).value);
+            });
+
+            // Actualizar displays
+            document.getElementById('total-proyecto').textContent = formatCurrency(totalProyecto);
+            document.getElementById('total-nomina').textContent = formatCurrency(totalNomina);
+            document.getElementById('total-general').textContent = formatCurrency(totalProyecto + totalNomina);
+        }
+
+        function formatCurrencyCustom(amount) {
+            return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Sobrescribir formatCurrency del calculator.js si existe
+        if (typeof formatCurrency === 'undefined') {
+            function formatCurrency(amount) {
+                return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+        }
+
+        function calcularTodo() {
+            // Obtener totales
+            const totalProyecto = proyectoInputs.reduce((sum, id) =>
+                sum + getNumericValue(document.getElementById(id).value), 0);
+
+            const totalNomina = nominaInputs.reduce((sum, id) =>
+                sum + getNumericValue(document.getElementById(id).value), 0);
+
+            if (totalProyecto === 0 && totalNomina === 0) {
+                alert('⚠️ Por favor ingresa al menos un monto');
+                return;
+            }
+
+            // Calcular denominaciones
+            const areas = [];
+
+            if (totalProyecto > 0) {
+                areas.push({
+                    nombre: 'Proyecto',
+                    total: totalProyecto,
+                    denominaciones: calculateDenominations(totalProyecto)
+                });
+            }
+
+            if (totalNomina > 0) {
+                areas.push({
+                    nombre: 'Nómina',
+                    total: totalNomina,
+                    denominaciones: calculateDenominations(totalNomina)
+                });
+            }
+
+            // Mostrar denominaciones
+            mostrarDenominaciones(areas);
+        }
+
+        function mostrarDenominaciones(areas) {
+            const container = document.getElementById('denominations-container');
+            const grid = document.getElementById('denominations-grid');
+
+            grid.innerHTML = '';
+
+            // Todas las denominaciones en orden
+            const todasDenominaciones = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
+
+            // Calcular total combinado de denominaciones
+            const totalCombinado = {};
+            let sumaTotal = 0;
+
+            // Inicializar todas las denominaciones en 0
+            todasDenominaciones.forEach(denom => {
+                totalCombinado[denom] = 0;
+            });
+
+            areas.forEach(area => {
+                sumaTotal += area.total;
+                Object.entries(area.denominaciones.denominations).forEach(([denom, cantidad]) => {
+                    totalCombinado[denom] = (totalCombinado[denom] || 0) + cantidad;
+                });
+            });
+
+            // Mostrar cada área individual
+            areas.forEach(area => {
+                const card = document.createElement('div');
+                card.className = 'denomination-card';
+
+                let html = `
+                    <h3>${area.nombre}</h3>
+                    <div style="text-align: center; font-size: 1.5em; color: #11998e; font-weight: bold; margin-bottom: 15px;">
+                        ${formatCurrency(area.total)}
+                    </div>
+                `;
+
+                // Mostrar todas las denominaciones
+                todasDenominaciones.forEach(denom => {
+                    const cantidad = area.denominaciones.denominations[denom] || 0;
+                    const valor = parseFloat(denom);
+                    const tipo = valor >= 20 ? '💵' : '🪙';
+                    const subtotal = cantidad * valor;
+                    const classZero = cantidad === 0 ? 'zero' : '';
+
+                    html += `
+                        <div class="denomination-item ${classZero}">
+                            <span class="denomination-label">${tipo} $${formatNumber(denom)}</span>
+                            <span class="denomination-value">${cantidad} piezas</span>
+                            <span class="denomination-subtotal">${formatCurrency(subtotal)}</span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = html;
+                grid.appendChild(card);
+            });
+
+            // Agregar tarjeta de TOTAL GENERAL
+            const cardTotal = document.createElement('div');
+            cardTotal.className = 'denomination-card';
+            cardTotal.style.background = '#2a2a2a';
+            cardTotal.style.borderColor = '#3a3a3a';
+
+            let htmlTotal = `
+                <h3 style="color: #ffffff; border-bottom-color: #3a3a3a;">🎯 TOTAL GENERAL</h3>
+                <div style="text-align: center; font-size: 1.8em; font-weight: 600; margin-bottom: 15px; color: #ffffff;">
+                    ${formatCurrency(sumaTotal)}
+                </div>
+            `;
+
+            // Mostrar todas las denominaciones totales
+            todasDenominaciones.forEach(denom => {
+                const cantidad = totalCombinado[denom] || 0;
+                const valor = parseFloat(denom);
+                const tipo = valor >= 20 ? '💵' : '🪙';
+                const subtotal = cantidad * valor;
+                const classZero = cantidad === 0 ? 'zero' : '';
+
+                htmlTotal += `
+                    <div class="denomination-item ${classZero}" style="border-bottom-color: #3a3a3a;">
+                        <span class="denomination-label" style="color: ${cantidad === 0 ? '#5a5a5a' : '#ffffff'};">${tipo} $${formatNumber(denom)}</span>
+                        <span class="denomination-value" style="color: ${cantidad === 0 ? '#5a5a5a' : '#ffffff'};">${cantidad} piezas</span>
+                        <span class="denomination-subtotal" style="color: ${cantidad === 0 ? '#5a5a5a' : '#ffffff'}; font-weight: 600;">${formatCurrency(subtotal)}</span>
+                    </div>
+                `;
+            });
+
+            cardTotal.innerHTML = htmlTotal;
+            grid.appendChild(cardTotal);
+
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function formatNumber(num) {
+            return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Calcular totales iniciales
+        actualizarTotales();
+
+        // ========================================
+        // SISTEMA DE HISTORIAL
+        // ========================================
+
+        let datosActuales = null; // Guardar datos del último cálculo
+
+        function guardarEnHistorial() {
+            if (!datosActuales) {
+                alert('⚠️ Primero calcula las denominaciones');
+                return;
+            }
+
+            // Verificar que las denominaciones estén presentes
+            console.log('Datos a guardar:', datosActuales);
+
+            // Crear registro
+            const registro = {
+                id: Date.now(),
+                fecha: new Date().toISOString(),
+                ...datosActuales
+            };
+
+            // Obtener historial actual
+            let historial = JSON.parse(localStorage.getItem('historial_denominaciones') || '[]');
+
+            // Agregar nuevo registro al inicio
+            historial.unshift(registro);
+
+            // Guardar en localStorage
+            localStorage.setItem('historial_denominaciones', JSON.stringify(historial));
+
+            // Actualizar vista
+            cargarHistorial();
+
+            // Verificar que se guardó correctamente
+            const verificacion = JSON.parse(localStorage.getItem('historial_denominaciones') || '[]')[0];
+            console.log('Registro guardado:', verificacion);
+
+            if (verificacion && (verificacion.denominacionesProyecto || verificacion.denominacionesNomina)) {
+                alert('✅ Guardado en el historial (con denominaciones)');
+            } else {
+                alert('✅ Guardado en el historial\n⚠️ Nota: Revisa la consola para debug');
+            }
+        }
+
+        function cargarHistorial() {
+            const container = document.getElementById('historial-container');
+            const historial = JSON.parse(localStorage.getItem('historial_denominaciones') || '[]');
+
+            if (historial.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #8a8a8a; padding: 40px;">No hay registros en el historial</p>';
+                return;
+            }
+
+            let html = '';
+
+            historial.forEach(registro => {
+                const fecha = new Date(registro.fecha);
+                const fechaFormato = fecha.toLocaleDateString('es-MX', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                html += `
+                    <div class="historial-item">
+                        <div class="historial-header">
+                            <div>
+                                <div class="historial-fecha">📅 ${fechaFormato}</div>
+                            </div>
+                            <div class="historial-total">${formatCurrency(registro.totalGeneral)}</div>
+                        </div>
+
+                        <div class="historial-areas">
+                            ${registro.totalProyecto > 0 ? `
+                                <div class="historial-area">
+                                    <div class="historial-area-nombre">📊 Proyecto</div>
+                                    <div class="historial-area-total">${formatCurrency(registro.totalProyecto)}</div>
+                                </div>
+                            ` : ''}
+                            ${registro.totalNomina > 0 ? `
+                                <div class="historial-area">
+                                    <div class="historial-area-nombre">👥 Nómina</div>
+                                    <div class="historial-area-total">${formatCurrency(registro.totalNomina)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="historial-actions">
+                            <button class="btn-small" onclick="toggleDetalle(${registro.id})">
+                                👁️ Ver Detalle
+                            </button>
+                            <button class="btn-small btn-danger" onclick="eliminarRegistro(${registro.id})">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+
+                        <div class="historial-detalle" id="detalle-${registro.id}">
+                            ${generarDetalleHTML(registro)}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function generarDetalleHTML(registro) {
+            const todasDenominaciones = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
+
+            let html = '<div style="margin-bottom: 25px;">';
+            html += '<h4 style="color: #ffffff; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2a2a;">💰 Subáreas</h4>';
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">';
+
+            // Proyecto
+            if (registro.totalProyecto > 0) {
+                html += '<div>';
+                html += '<h5 style="color: #b0b0b0; margin-bottom: 10px; font-weight: 500;">📊 Proyecto</h5>';
+                if (registro.datosProyecto['nomina-proyecto'] > 0) {
+                    html += `<div class="historial-subarea"><span>Nómina Proyecto</span><span>${formatCurrency(registro.datosProyecto['nomina-proyecto'])}</span></div>`;
+                }
+                if (registro.datosProyecto['tiempo-extra-proyecto'] > 0) {
+                    html += `<div class="historial-subarea"><span>Tiempo Extra</span><span>${formatCurrency(registro.datosProyecto['tiempo-extra-proyecto'])}</span></div>`;
+                }
+                if (registro.datosProyecto['bono-proyecto'] > 0) {
+                    html += `<div class="historial-subarea"><span>Bono Proyecto</span><span>${formatCurrency(registro.datosProyecto['bono-proyecto'])}</span></div>`;
+                }
+                html += '</div>';
+            }
+
+            // Nómina
+            if (registro.totalNomina > 0) {
+                html += '<div>';
+                html += '<h5 style="color: #b0b0b0; margin-bottom: 10px; font-weight: 500;">👥 Nómina</h5>';
+                if (registro.datosNomina['nomina'] > 0) {
+                    html += `<div class="historial-subarea"><span>Nómina</span><span>${formatCurrency(registro.datosNomina['nomina'])}</span></div>`;
+                }
+                if (registro.datosNomina['tiempo-extra-nomina'] > 0) {
+                    html += `<div class="historial-subarea"><span>Tiempo Extra</span><span>${formatCurrency(registro.datosNomina['tiempo-extra-nomina'])}</span></div>`;
+                }
+                if (registro.datosNomina['bono-nomina'] > 0) {
+                    html += `<div class="historial-subarea"><span>Bono Nómina</span><span>${formatCurrency(registro.datosNomina['bono-nomina'])}</span></div>`;
+                }
+                if (registro.datosNomina['bono-recomendacion'] > 0) {
+                    html += `<div class="historial-subarea"><span>Bono Recomendación</span><span>${formatCurrency(registro.datosNomina['bono-recomendacion'])}</span></div>`;
+                }
+                if (registro.datosNomina['personal-temporal'] > 0) {
+                    html += `<div class="historial-subarea"><span>Personal Temporal</span><span>${formatCurrency(registro.datosNomina['personal-temporal'])}</span></div>`;
+                }
+                if (registro.datosNomina['dia-festivo'] > 0) {
+                    html += `<div class="historial-subarea"><span>Día Festivo</span><span>${formatCurrency(registro.datosNomina['dia-festivo'])}</span></div>`;
+                }
+                html += '</div>';
+            }
+
+            html += '</div></div>';
+
+            // DENOMINACIONES
+            if (registro.denominacionesProyecto || registro.denominacionesNomina) {
+                html += '<div>';
+                html += '<h4 style="color: #ffffff; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a2a2a;">💵 Denominaciones</h4>';
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">';
+
+                // Denominaciones Proyecto
+                if (registro.denominacionesProyecto) {
+                    html += '<div style="background: #1a1a1a; padding: 15px; border-radius: 3px; border: 1px solid #2a2a2a;">';
+                    html += '<h5 style="color: #b0b0b0; margin-bottom: 12px; font-weight: 500;">📊 Proyecto</h5>';
+
+                    todasDenominaciones.forEach(denom => {
+                        const cantidad = registro.denominacionesProyecto.denominations[denom] || 0;
+                        const subtotal = cantidad * denom;
+                        const tipo = denom >= 20 ? '💵' : '🪙';
+                        const opacity = cantidad === 0 ? 'style="opacity: 0.3;"' : '';
+
+                        html += `
+                            <div ${opacity} style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 6px 0; border-bottom: 1px solid #252525; font-size: 0.9em;">
+                                <span style="color: #b0b0b0;">${tipo} $${formatNumber(denom)}</span>
+                                <span style="color: #ffffff; text-align: right;">${cantidad}</span>
+                                <span style="color: #ffffff; font-weight: 600; text-align: right; min-width: 80px;">${formatCurrency(subtotal)}</span>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                }
+
+                // Denominaciones Nómina
+                if (registro.denominacionesNomina) {
+                    html += '<div style="background: #1a1a1a; padding: 15px; border-radius: 3px; border: 1px solid #2a2a2a;">';
+                    html += '<h5 style="color: #b0b0b0; margin-bottom: 12px; font-weight: 500;">👥 Nómina</h5>';
+
+                    todasDenominaciones.forEach(denom => {
+                        const cantidad = registro.denominacionesNomina.denominations[denom] || 0;
+                        const subtotal = cantidad * denom;
+                        const tipo = denom >= 20 ? '💵' : '🪙';
+                        const opacity = cantidad === 0 ? 'style="opacity: 0.3;"' : '';
+
+                        html += `
+                            <div ${opacity} style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 6px 0; border-bottom: 1px solid #252525; font-size: 0.9em;">
+                                <span style="color: #b0b0b0;">${tipo} $${formatNumber(denom)}</span>
+                                <span style="color: #ffffff; text-align: right;">${cantidad}</span>
+                                <span style="color: #ffffff; font-weight: 600; text-align: right; min-width: 80px;">${formatCurrency(subtotal)}</span>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                }
+
+                // Total General de Denominaciones
+                if (registro.denominacionesProyecto && registro.denominacionesNomina) {
+                    html += '<div style="background: #2a2a2a; padding: 15px; border-radius: 3px; border: 1px solid #3a3a3a;">';
+                    html += '<h5 style="color: #ffffff; margin-bottom: 12px; font-weight: 600;">🎯 Total General</h5>';
+
+                    const totalCombinado = {};
+                    todasDenominaciones.forEach(d => totalCombinado[d] = 0);
+
+                    if (registro.denominacionesProyecto) {
+                        Object.entries(registro.denominacionesProyecto.denominations).forEach(([d, c]) => {
+                            totalCombinado[d] = (totalCombinado[d] || 0) + c;
+                        });
+                    }
+                    if (registro.denominacionesNomina) {
+                        Object.entries(registro.denominacionesNomina.denominations).forEach(([d, c]) => {
+                            totalCombinado[d] = (totalCombinado[d] || 0) + c;
+                        });
+                    }
+
+                    todasDenominaciones.forEach(denom => {
+                        const cantidad = totalCombinado[denom] || 0;
+                        const subtotal = cantidad * denom;
+                        const tipo = denom >= 20 ? '💵' : '🪙';
+                        const opacity = cantidad === 0 ? 'style="opacity: 0.3;"' : '';
+
+                        html += `
+                            <div ${opacity} style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 6px 0; border-bottom: 1px solid #3a3a3a; font-size: 0.9em;">
+                                <span style="color: #ffffff;">${tipo} $${formatNumber(denom)}</span>
+                                <span style="color: #ffffff; text-align: right; font-weight: 600;">${cantidad}</span>
+                                <span style="color: #ffffff; font-weight: 600; text-align: right; min-width: 80px;">${formatCurrency(subtotal)}</span>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                }
+
+                html += '</div></div>';
+            }
+
+            return html;
+        }
+
+        function toggleDetalle(id) {
+            const detalle = document.getElementById('detalle-' + id);
+            detalle.classList.toggle('show');
+        }
+
+        function eliminarRegistro(id) {
+            if (!confirm('¿Estás seguro de eliminar este registro?')) {
+                return;
+            }
+
+            let historial = JSON.parse(localStorage.getItem('historial_denominaciones') || '[]');
+            historial = historial.filter(r => r.id !== id);
+            localStorage.setItem('historial_denominaciones', JSON.stringify(historial));
+            cargarHistorial();
+        }
+
+        function limpiarHistorial() {
+            if (!confirm('⚠️ ¿Estás seguro de eliminar TODO el historial? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            localStorage.removeItem('historial_denominaciones');
+            cargarHistorial();
+        }
+
+        // Modificar calcularTodo para guardar datos
+        const calcularTodoOriginal = calcularTodo;
+        calcularTodo = function() {
+            calcularTodoOriginal();
+
+            // Guardar datos del cálculo actual
+            const totalProyecto = proyectoInputs.reduce((sum, id) =>
+                sum + getNumericValue(document.getElementById(id).value), 0);
+
+            const totalNomina = nominaInputs.reduce((sum, id) =>
+                sum + getNumericValue(document.getElementById(id).value), 0);
+
+            if (totalProyecto === 0 && totalNomina === 0) {
+                return;
+            }
+
+            // Recopilar datos de subáreas
+            const datosProyecto = {};
+            proyectoInputs.forEach(id => {
+                datosProyecto[id] = getNumericValue(document.getElementById(id).value);
+            });
+
+            const datosNomina = {};
+            nominaInputs.forEach(id => {
+                datosNomina[id] = getNumericValue(document.getElementById(id).value);
+            });
+
+            // Calcular denominaciones
+            const denominacionesProyecto = totalProyecto > 0 ? calculateDenominations(totalProyecto) : null;
+            const denominacionesNomina = totalNomina > 0 ? calculateDenominations(totalNomina) : null;
+
+            datosActuales = {
+                totalProyecto,
+                totalNomina,
+                totalGeneral: totalProyecto + totalNomina,
+                datosProyecto,
+                datosNomina,
+                denominacionesProyecto,
+                denominacionesNomina
+            };
+        };
+
+        // Cargar historial al inicio
+        cargarHistorial();
+    </script>
+</body>
+</html>

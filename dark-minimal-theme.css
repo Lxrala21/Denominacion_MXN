@@ -1,0 +1,267 @@
+/*
+ * DARK MINIMAL THEME
+ * Tema oscuro minimalista para aplicaciones web
+ * Creado para: Lxrala21
+ * Fecha: 2026-02-16
+ *
+ * Paleta de colores:
+ * - Fondo principal: #0a0a0a
+ * - Contenedor: #1a1a1a
+ * - Tarjetas: #1f1f1f
+ * - Bordes: #2a2a2a, #3a3a3a
+ * - Texto principal: #ffffff, #e0e0e0
+ * - Texto secundario: #b0b0b0, #8a8a8a
+ * - Hover/Focus: #4a4a4a
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    background: #0a0a0a;
+    min-height: 100vh;
+    padding: 20px;
+    color: #e0e0e0;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #1a1a1a;
+    border-radius: 4px;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+}
+
+/* HEADER */
+.header {
+    background: #1f1f1f;
+    color: #ffffff;
+    padding: 40px 30px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.header h1 {
+    font-size: 2em;
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.header p {
+    font-size: 0.95em;
+    color: #8a8a8a;
+    font-weight: 400;
+}
+
+/* SECCIONES */
+.section {
+    background: #1f1f1f;
+    border-radius: 4px;
+    padding: 25px;
+    border: 1px solid #2a2a2a;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.3em;
+    color: #ffffff;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2a2a2a;
+    font-weight: 500;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 3px;
+    border: 1px solid #2a2a2a;
+}
+
+.card-title {
+    display: block;
+    font-weight: 500;
+    color: #b0b0b0;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* INPUTS */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #2a2a2a;
+    border-radius: 3px;
+    font-size: 1em;
+    transition: all 0.2s;
+    background: #0f0f0f;
+    color: #ffffff;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #4a4a4a;
+    background: #1a1a1a;
+}
+
+/* BOTONES */
+.btn {
+    background: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+    padding: 12px 24px;
+    font-size: 1em;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:hover {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+}
+
+.btn-primary:hover {
+    background: #4a4a4a;
+}
+
+/* TABLAS */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1f1f1f;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+}
+
+th {
+    background: #1a1a1a;
+    color: #b0b0b0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9em;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #252525;
+    color: #e0e0e0;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background: #1a1a1a;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    gap: 20px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* UTILIDADES */
+.text-primary {
+    color: #ffffff;
+}
+
+.text-secondary {
+    color: #b0b0b0;
+}
+
+.text-muted {
+    color: #8a8a8a;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.font-bold {
+    font-weight: 600;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.uppercase {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+
+.p-1 { padding: 8px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 1.5em;
+    }
+}
