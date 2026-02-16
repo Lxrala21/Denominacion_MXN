@@ -370,6 +370,88 @@
         .historial-subarea:last-child {
             border-bottom: none;
         }
+
+        /* MODAL USUARIO */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2a2a2a;
+            border-radius: 3px;
+            font-size: 1.1em;
+            background: #0f0f0f;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #4a4a4a;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: 1px solid #3a3a3a;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-primary {
+            background: #3a3a3a;
+            color: #ffffff;
+        }
+
+        .modal-btn-primary:hover {
+            background: #4a4a4a;
+        }
+
+        .modal-btn-secondary {
+            background: transparent;
+            color: #b0b0b0;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #2a2a2a;
+        }
     </style>
 </head>
 <body>
@@ -473,6 +555,28 @@
                 <div id="historial-container">
                     <p style="text-align: center; color: #8a8a8a; padding: 40px;">No hay registros en el historial</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Usuario -->
+    <div class="modal" id="modal-usuario">
+        <div class="modal-content">
+            <div class="modal-title">👤 Identificación</div>
+            <input
+                type="text"
+                id="input-usuario"
+                class="modal-input"
+                placeholder="Escribe tu nombre..."
+                maxlength="100"
+            />
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="cerrarModalUsuario()">
+                    Cancelar
+                </button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmarUsuario()">
+                    Continuar
+                </button>
             </div>
         </div>
     </div>
@@ -723,6 +827,10 @@
         const API_URL = 'http://localhost:3002/api';
         let datosActuales = null; // Guardar datos del último cálculo
 
+        // ========================================
+        // GUARDAR EN HISTORIAL
+        // ========================================
+
         async function guardarEnHistorial() {
             if (!datosActuales) {
                 alert('⚠️ Primero calcula las denominaciones');
@@ -741,7 +849,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('✅ Guardado en MySQL (ID: ' + result.id + ')');
+                    alert(`✅ Guardado en MySQL (ID: ${result.id})`);
                     await cargarHistorial();
                 } else {
                     alert('❌ Error guardando: ' + (result.error || 'Error desconocido'));

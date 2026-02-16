@@ -88,6 +88,24 @@ INSERT INTO denominaciones (calculo_id, area, denominacion, cantidad, subtotal) 
 (@ultimo_id, 'total', 1000, 43, 43000.00);
 
 -- ================================================
+-- Tabla: actividad
+-- Descripción: Registro de todas las acciones
+-- ================================================
+CREATE TABLE actividad (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(50),
+    accion ENUM('crear', 'ver', 'eliminar', 'limpiar', 'exportar') NOT NULL,
+    calculo_id INT NULL,
+    monto DECIMAL(10,2),
+    detalles TEXT,
+    fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_usuario (usuario),
+    INDEX idx_fecha (fecha_hora),
+    INDEX idx_accion (accion)
+) ENGINE=InnoDB;
+
+-- ================================================
 -- Vistas útiles
 -- ================================================
 

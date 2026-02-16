@@ -180,6 +180,73 @@
             background: #713f12;
             color: #fbbf24;
         }
+
+        .actividad-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 15px;
+            padding: 12px;
+            border-bottom: 1px solid #252525;
+            align-items: center;
+        }
+
+        .actividad-item:hover {
+            background: #1a1a1a;
+        }
+
+        .actividad-icon {
+            font-size: 1.5em;
+        }
+
+        .actividad-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .actividad-usuario {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .actividad-accion {
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+
+        .actividad-ip {
+            color: #8a8a8a;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+
+        .actividad-fecha {
+            color: #8a8a8a;
+            font-size: 0.85em;
+            text-align: right;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            background: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            border-radius: 3px;
+            color: #ffffff;
+            font-size: 0.9em;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #4a4a4a;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +300,38 @@
             </div>
             <div id="tabla-denominaciones">
                 <div class="loading">Cargando datos...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">📋 Registro de Actividad</div>
+                <button class="btn" onclick="cargarActividad()">🔄 Actualizar</button>
+            </div>
+            <div class="filter-bar">
+                <input
+                    type="text"
+                    id="filter-usuario"
+                    class="filter-input"
+                    placeholder="Filtrar por usuario..."
+                    onchange="cargarActividad()"
+                />
+                <select id="filter-accion" class="filter-input" onchange="cargarActividad()">
+                    <option value="">Todas las acciones</option>
+                    <option value="crear">Crear</option>
+                    <option value="eliminar">Eliminar</option>
+                    <option value="limpiar">Limpiar</option>
+                    <option value="ver">Ver</option>
+                </select>
+                <select id="filter-limit" class="filter-input" onchange="cargarActividad()">
+                    <option value="25">Últimas 25</option>
+                    <option value="50" selected>Últimas 50</option>
+                    <option value="100">Últimas 100</option>
+                    <option value="500">Últimas 500</option>
+                </select>
+            </div>
+            <div id="tabla-actividad">
+                <div class="loading">Cargando actividad...</div>
             </div>
         </div>
     </div>
@@ -462,6 +561,92 @@
             await cargarCalculos();
             await cargarSubareas();
             await cargarDenominaciones();
+        }
+
+        async function cargarActividad() {
+            try {
+                const usuario = document.getElementById('filter-usuario').value;
+                const accion = document.getElementById('filter-accion').value;
+                const limit = document.getElementById('filter-limit').value;
+
+                let url = `${API_URL}/actividad?limit=${limit}`;
+                if (usuario) url += `&usuario=${encodeURIComponent(usuario)}`;
+                if (accion) url += `&accion=${accion}`;
+
+                const response = await fetch(url);
+                const actividades = await response.json();
+
+                const container = document.getElementById('tabla-actividad');
+
+                if (actividades.length === 0) {
+                    container.innerHTML = '<div class="empty">No hay actividad registrada</div>';
+                    return;
+                }
+
+                const iconos = {
+                    'crear': '✅',
+                    'eliminar': '🗑️',
+                    'limpiar': '🧹',
+                    'ver': '👁️',
+                    'exportar': '📥'
+                };
+
+                let html = '';
+                actividades.forEach(act => {
+                    const fecha = new Date(act.fecha_hora);
+                    const fechaFormato = fecha.toLocaleString('es-MX', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    let descripcion = '';
+                    switch(act.accion) {
+                        case 'crear':
+                            descripcion = `Guardó cálculo #${act.calculo_id} por ${formatCurrency(act.monto)}`;
+                            break;
+                        case 'eliminar':
+                            descripcion = `Eliminó cálculo #${act.calculo_id}`;
+                            break;
+                        case 'limpiar':
+                            descripcion = act.detalles || 'Limpió el historial';
+                            break;
+                        case 'ver':
+                            descripcion = `Vio cálculo #${act.calculo_id}`;
+                            break;
+                        default:
+                            descripcion = act.detalles || act.accion;
+                    }
+
+                    html += `
+                        <div class="actividad-item">
+                            <div class="actividad-icon">${iconos[act.accion] || '📋'}</div>
+                            <div class="actividad-info">
+                                <div class="actividad-usuario">${act.usuario}</div>
+                                <div class="actividad-accion">${descripcion}</div>
+                                ${act.ip_address ? `<div class="actividad-ip">IP: ${act.ip_address}</div>` : ''}
+                            </div>
+                            <div class="actividad-fecha">${fechaFormato}</div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando actividad:', error);
+                document.getElementById('tabla-actividad').innerHTML =
+                    '<div class="error">❌ Error cargando actividad</div>';
+            }
+        }
+
+        async function cargarDatos() {
+            await cargarEstadisticas();
+            await cargarCalculos();
+            await cargarSubareas();
+            await cargarDenominaciones();
+            await cargarActividad();
         }
 
         // Cargar al inicio

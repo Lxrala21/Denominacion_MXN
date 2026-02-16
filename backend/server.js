@@ -39,6 +39,37 @@ db.connect((err) => {
 });
 
 // ================================================
+// FUNCIONES AUXILIARES
+// ================================================
+
+/**
+ * Obtener IP real del cliente
+ */
+function getClientIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0] ||
+           req.headers['x-real-ip'] ||
+           req.connection.remoteAddress ||
+           req.socket.remoteAddress ||
+           'unknown';
+}
+
+/**
+ * Registrar actividad en la BD
+ */
+function registrarActividad(usuario, ip, accion, calculoId = null, monto = null, detalles = null) {
+    const query = `
+        INSERT INTO actividad (usuario, ip_address, accion, calculo_id, monto, detalles)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(query, [usuario, ip, accion, calculoId, monto, detalles], (err) => {
+        if (err) {
+            console.error('Error registrando actividad:', err);
+        }
+    });
+}
+
+// ================================================
 // RUTAS API
 // ================================================
 
@@ -192,19 +223,33 @@ app.post('/api/calculos', (req, res) => {
         return res.status(400).json({ error: 'Total general inválido' });
     }
 
+    // Capturar IP como identificador
+    const clientIP = getClientIP(req);
+    const usuario = clientIP; // Usar IP como usuario
+
     // Insertar cálculo principal
     const queryCalculo = `
-        INSERT INTO calculos (total_proyecto, total_nomina, total_general)
-        VALUES (?, ?, ?)
+        INSERT INTO calculos (total_proyecto, total_nomina, total_general, usuario)
+        VALUES (?, ?, ?, ?)
     `;
 
-    db.query(queryCalculo, [totalProyecto, totalNomina, totalGeneral], (err, result) => {
+    db.query(queryCalculo, [totalProyecto, totalNomina, totalGeneral, usuario], (err, result) => {
         if (err) {
             console.error('Error insertando cálculo:', err);
             return res.status(500).json({ error: err.message });
         }
 
         const calculoId = result.insertId;
+
+        // Registrar actividad
+        registrarActividad(
+            usuario,
+            clientIP,
+            'crear',
+            calculoId,
+            totalGeneral,
+            `Proyecto: $${totalProyecto}, Nómina: $${totalNomina}`
+        );
 
         // Insertar subareas
         const subareasValues = [];
@@ -294,20 +339,43 @@ app.post('/api/calculos', (req, res) => {
 app.delete('/api/calculos/:id', (req, res) => {
     const calculoId = req.params.id;
 
-    const query = 'DELETE FROM calculos WHERE id = ?';
+    const clientIP = getClientIP(req);
+    const usuario = clientIP; // Usar IP como usuario
 
-    db.query(query, [calculoId], (err, result) => {
+    // Primero obtener info del cálculo antes de eliminarlo
+    db.query('SELECT total_general FROM calculos WHERE id = ?', [calculoId], (err, results) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
 
-        if (result.affectedRows === 0) {
+        if (results.length === 0) {
             return res.status(404).json({ error: 'Cálculo no encontrado' });
         }
 
-        res.json({
-            success: true,
-            message: 'Cálculo eliminado exitosamente'
+        const monto = results[0].total_general;
+
+        // Eliminar
+        const query = 'DELETE FROM calculos WHERE id = ?';
+
+        db.query(query, [calculoId], (err, result) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
+            // Registrar actividad
+            registrarActividad(
+                usuario,
+                clientIP,
+                'eliminar',
+                calculoId,
+                monto,
+                `Eliminó cálculo #${calculoId}`
+            );
+
+            res.json({
+                success: true,
+                message: 'Cálculo eliminado exitosamente'
+            });
         });
     });
 });
@@ -317,6 +385,9 @@ app.delete('/api/calculos/:id', (req, res) => {
  * Limpiar todo el historial
  */
 app.delete('/api/calculos', (req, res) => {
+    const clientIP = getClientIP(req);
+    const usuario = clientIP; // Usar IP como usuario
+
     const query = 'DELETE FROM calculos';
 
     db.query(query, (err, result) => {
@@ -324,11 +395,56 @@ app.delete('/api/calculos', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
 
+        // Registrar actividad
+        registrarActividad(
+            usuario,
+            clientIP,
+            'limpiar',
+            null,
+            null,
+            `Limpió ${result.affectedRows} registros del historial`
+        );
+
         res.json({
             success: true,
             deletedCount: result.affectedRows,
             message: 'Historial limpiado exitosamente'
         });
+    });
+});
+
+// ================================================
+// ACTIVIDAD / LOG
+// ================================================
+
+/**
+ * GET /api/actividad
+ * Obtener registro de actividad
+ */
+app.get('/api/actividad', (req, res) => {
+    const { limit = 50, usuario, accion } = req.query;
+
+    let query = 'SELECT * FROM actividad WHERE 1=1';
+    const params = [];
+
+    if (usuario) {
+        query += ' AND usuario LIKE ?';
+        params.push(`%${usuario}%`);
+    }
+
+    if (accion) {
+        query += ' AND accion = ?';
+        params.push(accion);
+    }
+
+    query += ' ORDER BY fecha_hora DESC LIMIT ?';
+    params.push(parseInt(limit));
+
+    db.query(query, params, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
     });
 });
 
