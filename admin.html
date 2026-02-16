@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Base de Datos MySQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #1f1f1f;
+            padding: 30px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1f1f1f;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .stat-label {
+            color: #8a8a8a;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .section {
+            background: #1f1f1f;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #1a1a1a;
+            padding: 15px 20px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #3a3a3a;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn:hover {
+            background: #3a3a3a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: #b0b0b0;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85em;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #252525;
+            color: #e0e0e0;
+        }
+
+        tr:hover {
+            background: #1a1a1a;
+        }
+
+        .money {
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        .date {
+            color: #8a8a8a;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8a8a8a;
+        }
+
+        .error {
+            background: #3a1a1a;
+            color: #f87171;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 4px;
+            border: 1px solid #4a2a2a;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #8a8a8a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .badge-proyecto {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .badge-nomina {
+            background: #166534;
+            color: #86efac;
+        }
+
+        .badge-total {
+            background: #713f12;
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Administración de Base de Datos</h1>
+            <p>denominaciones_db - MySQL 8.4</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Cálculos</div>
+                <div class="stat-value" id="stat-total">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Suma Total</div>
+                <div class="stat-value money" id="stat-suma">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Promedio Proyecto</div>
+                <div class="stat-value" id="stat-proyecto">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Promedio Nómina</div>
+                <div class="stat-value" id="stat-nomina">-</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">📋 Tabla: calculos</div>
+                <button class="btn" onclick="cargarDatos()">🔄 Actualizar</button>
+            </div>
+            <div id="tabla-calculos">
+                <div class="loading">Cargando datos...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">📊 Tabla: subareas</div>
+            </div>
+            <div id="tabla-subareas">
+                <div class="loading">Cargando datos...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">💵 Tabla: denominaciones</div>
+            </div>
+            <div id="tabla-denominaciones">
+                <div class="loading">Cargando datos...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/api';
+
+        function formatCurrency(amount) {
+            return '$' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch(`${API_URL}/estadisticas`);
+                const stats = await response.json();
+
+                document.getElementById('stat-total').textContent = stats.totalCalculos;
+                document.getElementById('stat-suma').textContent = formatCurrency(stats.sumaTotal);
+                document.getElementById('stat-proyecto').textContent = formatCurrency(stats.promedioProyecto);
+                document.getElementById('stat-nomina').textContent = formatCurrency(stats.promedioNomina);
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        async function cargarCalculos() {
+            try {
+                const response = await fetch(`${API_URL}/calculos`);
+                const calculos = await response.json();
+
+                const container = document.getElementById('tabla-calculos');
+
+                if (calculos.length === 0) {
+                    container.innerHTML = '<div class="empty">No hay registros</div>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>ID</th>';
+                html += '<th>Fecha y Hora</th>';
+                html += '<th>Total Proyecto</th>';
+                html += '<th>Total Nómina</th>';
+                html += '<th>Total General</th>';
+                html += '<th>Usuario</th>';
+                html += '</tr></thead><tbody>';
+
+                calculos.forEach(calc => {
+                    html += '<tr>';
+                    html += `<td>${calc.id}</td>`;
+                    html += `<td class="date">${formatDate(calc.fecha_hora)}</td>`;
+                    html += `<td class="money">${formatCurrency(calc.total_proyecto)}</td>`;
+                    html += `<td class="money">${formatCurrency(calc.total_nomina)}</td>`;
+                    html += `<td class="money"><strong>${formatCurrency(calc.total_general)}</strong></td>`;
+                    html += `<td>${calc.usuario || '-'}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando cálculos:', error);
+                document.getElementById('tabla-calculos').innerHTML =
+                    '<div class="error">❌ Error conectando con el servidor</div>';
+            }
+        }
+
+        async function cargarSubareas() {
+            try {
+                const response = await fetch(`${API_URL}/calculos`);
+                const calculos = await response.json();
+
+                const container = document.getElementById('tabla-subareas');
+
+                // Obtener todas las subareas de todos los cálculos
+                const subareas = [];
+                for (const calc of calculos) {
+                    const detResponse = await fetch(`${API_URL}/calculos/${calc.id}`);
+                    const detalle = await detResponse.json();
+
+                    // Subareas Proyecto
+                    if (detalle.datosProyecto) {
+                        Object.entries(detalle.datosProyecto).forEach(([sub, monto]) => {
+                            if (monto > 0) {
+                                subareas.push({
+                                    calculo_id: calc.id,
+                                    area: 'proyecto',
+                                    subarea: sub,
+                                    monto: monto
+                                });
+                            }
+                        });
+                    }
+
+                    // Subareas Nómina
+                    if (detalle.datosNomina) {
+                        Object.entries(detalle.datosNomina).forEach(([sub, monto]) => {
+                            if (monto > 0) {
+                                subareas.push({
+                                    calculo_id: calc.id,
+                                    area: 'nomina',
+                                    subarea: sub,
+                                    monto: monto
+                                });
+                            }
+                        });
+                    }
+                }
+
+                if (subareas.length === 0) {
+                    container.innerHTML = '<div class="empty">No hay subareas</div>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>Cálculo ID</th>';
+                html += '<th>Área</th>';
+                html += '<th>Subárea</th>';
+                html += '<th>Monto</th>';
+                html += '</tr></thead><tbody>';
+
+                subareas.forEach(sub => {
+                    html += '<tr>';
+                    html += `<td>${sub.calculo_id}</td>`;
+                    html += `<td><span class="badge badge-${sub.area}">${sub.area}</span></td>`;
+                    html += `<td>${sub.subarea}</td>`;
+                    html += `<td class="money">${formatCurrency(sub.monto)}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando subareas:', error);
+                document.getElementById('tabla-subareas').innerHTML =
+                    '<div class="error">❌ Error cargando subareas</div>';
+            }
+        }
+
+        async function cargarDenominaciones() {
+            try {
+                const response = await fetch(`${API_URL}/calculos`);
+                const calculos = await response.json();
+
+                const container = document.getElementById('tabla-denominaciones');
+
+                // Obtener todas las denominaciones
+                const denoms = [];
+                for (const calc of calculos) {
+                    const detResponse = await fetch(`${API_URL}/calculos/${calc.id}`);
+                    const detalle = await detResponse.json();
+
+                    // Denominaciones Proyecto
+                    if (detalle.denominacionesProyecto) {
+                        Object.entries(detalle.denominacionesProyecto.denominations).forEach(([denom, cant]) => {
+                            denoms.push({
+                                calculo_id: calc.id,
+                                area: 'proyecto',
+                                denominacion: denom,
+                                cantidad: cant,
+                                subtotal: denom * cant
+                            });
+                        });
+                    }
+
+                    // Denominaciones Nómina
+                    if (detalle.denominacionesNomina) {
+                        Object.entries(detalle.denominacionesNomina.denominations).forEach(([denom, cant]) => {
+                            denoms.push({
+                                calculo_id: calc.id,
+                                area: 'nomina',
+                                denominacion: denom,
+                                cantidad: cant,
+                                subtotal: denom * cant
+                            });
+                        });
+                    }
+                }
+
+                // Filtrar solo las que tienen cantidad > 0
+                const denomsVisibles = denoms.filter(d => d.cantidad > 0);
+
+                if (denomsVisibles.length === 0) {
+                    container.innerHTML = '<div class="empty">No hay denominaciones</div>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>Cálculo ID</th>';
+                html += '<th>Área</th>';
+                html += '<th>Denominación</th>';
+                html += '<th>Cantidad</th>';
+                html += '<th>Subtotal</th>';
+                html += '</tr></thead><tbody>';
+
+                denomsVisibles.forEach(d => {
+                    html += '<tr>';
+                    html += `<td>${d.calculo_id}</td>`;
+                    html += `<td><span class="badge badge-${d.area}">${d.area}</span></td>`;
+                    html += `<td>$${d.denominacion}</td>`;
+                    html += `<td>${d.cantidad} piezas</td>`;
+                    html += `<td class="money">${formatCurrency(d.subtotal)}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando denominaciones:', error);
+                document.getElementById('tabla-denominaciones').innerHTML =
+                    '<div class="error">❌ Error cargando denominaciones</div>';
+            }
+        }
+
+        async function cargarDatos() {
+            await cargarEstadisticas();
+            await cargarCalculos();
+            await cargarSubareas();
+            await cargarDenominaciones();
+        }
+
+        // Cargar al inicio
+        cargarDatos();
+
+        // Auto-actualizar cada 30 segundos
+        setInterval(cargarDatos, 30000);
+    </script>
+</body>
+</html>

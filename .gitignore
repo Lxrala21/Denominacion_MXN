@@ -46,3 +46,11 @@ exports/*.pdf
 
 # Logs
 *.log
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Temporal
+*.output
